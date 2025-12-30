@@ -8,138 +8,55 @@
 
 body {
     background-color: var(--dark);
-    background-image: url(./akira-hojo-ZxGdri2EWzk-unsplash\ \(1\).jpg);
     font-family: 'Inter', sans-serif;
-    color: white;
-    margin: 0;
-    overflow-x: hidden;
+    color: white; margin: 0; overflow-x: hidden;
 }
 
-/* Fondo Dinámico */
+.status-bar {
+    position: fixed; top: 0; left: 0; width: 100%;
+    z-index: 10000; text-align: center;
+    padding: 8px; font-size: 0.8rem; font-weight: bold; color: white;
+}
+
 .water-bg {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: url('https://images.unsplash.com/photo-1548504769-900b700122e1?q=80&w=2070') no-repeat center center;
-    background-size: cover;
-    z-index: -2;
+    background-size: cover; z-index: -2;
 }
 
 .dark-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(180deg, rgba(0, 18, 32, 0.4) 0%, rgba(0, 18, 32, 0.9) 100%);
     z-index: -1;
 }
 
-/* Glassmorphism Card */
 .glass-card {
     background: rgba(0, 31, 63, 0.6);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid var(--glass-border);
-    border-radius: 30px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
+    border-radius: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
 }
 
-.logo-main {
-    max-width: 220px;
-    filter: drop-shadow(0 0 10px rgba(0,210,255,0.3));
-}
+.logo-main { max-width: 220px; }
 
-/* Inputs Modernos */
 .glass-input {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid var(--glass-border) !important;
-    border-radius: 12px !important;
-    color: white !important;
-    padding: 12px 15px !important;
-    transition: all 0.3s ease;
+    border-radius: 12px !important; color: white !important;
 }
 
-.glass-input:focus {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3) !important;
-    outline: none;
-}
+.label-glass { font-size: 0.75rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); }
 
-.glass-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
+.form-control-static { background: transparent; border: none; color: white; width: 100%; font-size: 1.1rem; }
 
-.label-glass {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 5px;
-}
-
-.form-control-static {
-    background: transparent;
-    border: none;
-    color: white;
-    width: 100%;
-    font-size: 1.1rem;
-    padding: 0;
-}
-
-/* Botones */
 .btn-suragua {
     background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-    border: none;
-    color: #001220;
-    font-weight: 800;
-    border-radius: 12px;
-    padding: 15px;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
-
-.btn-suragua:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);
-    background: #ffffff;
-    color: #004e92;
+    border: none; color: #001220; font-weight: 800; border-radius: 12px; padding: 15px;
 }
 
 .btn-foto {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px dashed var(--primary);
-    color: white;
-    padding: 15px;
-    border-radius: 12px;
-    display: block;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s;
+    background: rgba(255, 255, 255, 0.05); border: 1px dashed var(--primary);
+    color: white; padding: 15px; border-radius: 12px; display: block; text-align: center; cursor: pointer;
 }
 
-.btn-foto:hover {
-    background: rgba(0, 210, 255, 0.1);
-}
-
-/* Resultados Panel Oficina */
-.results-container {
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-.results-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.results-container::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 10px;
-}
-
-.history-item {
-    background: rgba(255, 255, 255, 0.05);
-    border-left: 4px solid var(--primary);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
+.results-container { max-height: 400px; overflow-y: auto; }
+.history-item { background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 15px; border-radius: 10px; }

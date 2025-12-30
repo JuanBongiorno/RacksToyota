@@ -9,13 +9,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Fondo de Agua de Alta Resolución -->
+    <!-- Indicadores de Estado -->
+    <div id="offline-tag" class="status-bar bg-warning d-none">MODO OFFLINE: Los datos se guardarán en el teléfono</div>
+    <div id="sync-tag" class="status-bar bg-success d-none">Sincronizando datos pendientes con la nube...</div>
+
     <div class="water-bg"></div>
     <div class="dark-overlay"></div>
 
     <div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
         
-        <!-- LOGIN BOX -->
+        <!-- LOGIN -->
         <div id="login-box" class="glass-card p-5 text-center shadow-lg">
             <img src="./Suragua-Logotipo-removebg-preview.png" class="logo-main mb-4">
             <h2 class="text-white fw-light mb-4">Bienvenido</h2>
@@ -46,11 +49,11 @@
                     </div>
                     <div class="col-6">
                         <label class="label-glass">BIDONES LLENOS</label>
-                        <input type="number" id="llenos" class="form-control glass-input" required placeholder="Cant.">
+                        <input type="number" id="llenos" class="form-control glass-input" required>
                     </div>
                     <div class="col-6">
                         <label class="label-glass">BIDONES VACÍOS</label>
-                        <input type="number" id="vacios" class="form-control glass-input" required placeholder="Cant.">
+                        <input type="number" id="vacios" class="form-control glass-input" required>
                     </div>
                     <div class="col-6">
                         <label class="label-glass">SECTOR</label>
@@ -85,17 +88,18 @@
         <!-- PANEL OFICINA -->
         <div id="office-box" class="glass-card p-5 d-none w-100" style="max-width: 800px;">
             <div class="d-flex justify-content-between align-items-center mb-4">
+<<<<<<< HEAD
                 <img src="https://i.ibb.co/LhyM4pM/suragua-logo.png" style="width: 100px;">
+=======
+>>>>>>> a037d19 (modo offline)
                 <h4 class="text-white mb-0">Panel Control</h4>
             </div>
             <div class="input-group mb-4">
                 <input type="number" id="searchRack" class="form-control glass-input" placeholder="Nro de rack...">
                 <button class="btn btn-info px-4 fw-bold" onclick="buscarRack()">BUSCAR</button>
             </div>
-            <div id="historial-results" class="results-container">
-                <p class="text-white-50 text-center">Ingrese un número para ver el historial.</p>
-            </div>
-            <button class="btn btn-link text-white-50 mt-4 d-block mx-auto text-decoration-none" onclick="location.reload()">Soportar / Salir</button>
+            <div id="historial-results" class="results-container"></div>
+            <button class="btn btn-link text-white-50 mt-4 d-block mx-auto" onclick="location.reload()">Salir</button>
         </div>
 
     </div>

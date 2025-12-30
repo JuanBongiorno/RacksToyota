@@ -1,4 +1,5 @@
-const URL_API = "https://script.google.com/macros/s/AKfycbzyUnApdsiK2G0pDioq3Y8NWeb-qRAtwlrelrjdRxOcQQpm32_BzQOmQTHvSJO1NIMT/exec"; 
+// CONFIGURACIÓN - REEMPLAZA CON TU URL
+const URL_API = "https://script.google.com/macros/s/AKfycbx-RTlSpfcNb0ASawBHC6exk85T9TAlldWoBbP_NFzNEtE7XezLwYGVNGsUXbKOxXkZ/exec"; 
 
 const USUARIOS = {
     "ale": { pass: "suragua3876", nombre: "Ale" },
@@ -9,6 +10,14 @@ const USUARIOS = {
 
 let userActual = "";
 
+// 1. REGISTRO DE SERVICE WORKER PARA CARGA OFFLINE
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+    });
+}
+
+// 2. LÓGICA DE INICIO
 function login() {
     const u = document.getElementById('user').value.toLowerCase().trim();
     const p = document.getElementById('pass').value.trim();
@@ -23,105 +32,150 @@ function login() {
             document.getElementById('form-box').classList.remove('d-none');
             document.getElementById('repartidor').value = userActual;
             actualizarReloj();
-            setInterval(actualizarReloj, 60000); // Actualiza cada minuto
+            checkPendingSync(); 
         }
-    } else { 
-        alert("Usuario o clave incorrecta"); 
-    }
+    } else { alert("Usuario o clave incorrecta"); }
 }
 
 function actualizarReloj() {
     const ahora = new Date();
     const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    const fechaStr = ahora.toLocaleDateString('es-ES', opciones);
-    document.getElementById('displayFecha').value = fechaStr.charAt(0).toUpperCase() + fechaStr.slice(1);
+    document.getElementById('displayFecha').value = ahora.toLocaleDateString('es-ES', opciones);
 }
 
-document.getElementById('foto').onchange = (e) => {
-    if(e.target.files[0]) {
-        document.getElementById('foto-check').innerText = "✅ FOTO CARGADA CORRECTAMENTE";
-        document.getElementById('txt-foto').innerText = "📸 CAMBIAR FOTO";
-    }
-};
+// 3. COMPRESIÓN DE IMAGEN (Esto hace que sea RAPIDO)
+async function procesarImagen(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; // Resolución optimizada
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_WIDTH) { width *= MAX_WIDTH / height; height = MAX_WIDTH; }
+                }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', 0.7)); // Calidad 70%
+            };
+        };
+    });
+}
 
-document.getElementById('rackForm').onsubmit = function(e) {
+// 4. ENVÍO DE FORMULARIO
+document.getElementById('rackForm').onsubmit = async function(e) {
     e.preventDefault();
     const btn = document.getElementById('btnEnviar');
     const fotoFile = document.getElementById('foto').files[0];
 
-    if (!fotoFile) { alert("Por favor, capture la foto obligatoria."); return; }
-
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> ENVIANDO...';
+    btn.innerHTML = "PROCESANDO...";
 
-    const reader = new FileReader();
-    reader.readAsDataURL(fotoFile);
-    reader.onload = function() {
-        const payload = {
-            diaSemana: new Intl.DateTimeFormat('es-ES', { weekday: 'long'}).format(new Date()),
-            nroRack: document.getElementById('nroRack').value,
-            llenos: document.getElementById('llenos').value,
-            vacios: document.getElementById('vacios').value,
-            sector: document.getElementById('sector').value,
-            lugar: document.getElementById('lugar').value,
-            repartidor: userActual,
-            observaciones: document.getElementById('obs').value,
-            foto: reader.result
-        };
+    const fotoComprimida = await procesarImagen(fotoFile);
 
-        fetch(URL_API, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            alert("✅ REPORTE GUARDADO CON ÉXITO");
-            document.getElementById('rackForm').reset();
-            document.getElementById('repartidor').value = userActual;
-            document.getElementById('foto-check').innerText = "";
-            document.getElementById('txt-foto').innerText = "📸 SACAR FOTO OBLIGATORIA";
-            btn.disabled = false;
-            btn.innerHTML = "ENVIAR REPOSICIÓN";
-            actualizarReloj();
-        })
-        .catch(err => {
-            alert("Error al enviar. Intente nuevamente.");
-            btn.disabled = false;
-            btn.innerHTML = "ENVIAR REPOSICIÓN";
-        });
+    const data = {
+        diaSemana: new Intl.DateTimeFormat('es-ES', { weekday: 'long'}).format(new Date()),
+        nroRack: document.getElementById('nroRack').value,
+        llenos: document.getElementById('llenos').value,
+        vacios: document.getElementById('vacios').value,
+        sector: document.getElementById('sector').value,
+        lugar: document.getElementById('lugar').value,
+        repartidor: userActual,
+        observaciones: document.getElementById('obs').value,
+        foto: fotoComprimida,
+        timestamp: new Date().getTime()
     };
+
+    if (navigator.onLine) {
+        enviarServidor(data);
+    } else {
+        guardarLocal(data);
+    }
 };
 
+function enviarServidor(data) {
+    fetch(URL_API, {
+        method: "POST",
+        mode: 'no-cors',
+        body: JSON.stringify(data)
+    }).then(() => {
+        alert("✅ ENVIADO A LA NUBE");
+        limpiarForm();
+    }).catch(() => guardarLocal(data));
+}
+
+function guardarLocal(data) {
+    let cola = JSON.parse(localStorage.getItem('cola_racks') || "[]");
+    cola.push(data);
+    localStorage.setItem('cola_racks', JSON.stringify(cola));
+    alert("⚠️ GUARDADO EN MEMORIA (Sin internet). Se subirá solo cuando vuelvas a tener señal.");
+    limpiarForm();
+}
+
+function limpiarForm() {
+    document.getElementById('rackForm').reset();
+    document.getElementById('repartidor').value = userActual;
+    document.getElementById('foto-check').innerText = "";
+    document.getElementById('btnEnviar').disabled = false;
+    document.getElementById('btnEnviar').innerHTML = "ENVIAR REPORTE";
+}
+
+// 5. SINCRONIZACIÓN AUTOMÁTICA
+async function checkPendingSync() {
+    if (!navigator.onLine) return;
+    let cola = JSON.parse(localStorage.getItem('cola_racks') || "[]");
+    if (cola.length === 0) return;
+
+    document.getElementById('sync-tag').classList.remove('d-none');
+    for (let item of cola) {
+        await fetch(URL_API, { method: "POST", mode: 'no-cors', body: JSON.stringify(item) });
+    }
+    localStorage.removeItem('cola_racks');
+    document.getElementById('sync-tag').classList.add('d-none');
+    alert("✅ DATOS SINCRONIZADOS: " + cola.length + " reportes subidos.");
+}
+
+// Detectar conexión
+window.addEventListener('online', () => {
+    document.getElementById('offline-tag').classList.add('d-none');
+    checkPendingSync();
+});
+window.addEventListener('offline', () => {
+    document.getElementById('offline-tag').classList.remove('d-none');
+});
+
+// Foto check
+document.getElementById('foto').onchange = (e) => {
+    if(e.target.files[0]) {
+        document.getElementById('foto-check').innerText = "✅ FOTO LISTA";
+    }
+};
+
+// Buscar Rack (Solo con internet)
 async function buscarRack() {
     const rack = document.getElementById('searchRack').value;
     const resDiv = document.getElementById('historial-results');
-    if(!rack) return;
-
-    resDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-info"></div><p>Buscando historial...</p></div>';
+    resDiv.innerHTML = "Buscando...";
     
     try {
         const response = await fetch(URL_API);
         const data = await response.json();
         const filtrado = data.slice(1).filter(r => r[2] && r[2].toString() === rack);
         
-        if(filtrado.length === 0) {
-            resDiv.innerHTML = '<p class="text-center">No se encontraron movimientos para este rack.</p>';
-        } else {
-            resDiv.innerHTML = filtrado.reverse().map(r => `
-                <div class="history-item">
-                    <div class="d-flex justify-content-between mb-2">
-                        <small class="text-info">${r[0].split('T')[0]}</small>
-                        <small class="text-white-50">${r[7]}</small>
-                    </div>
-                    <div class="row">
-                        <div class="col-6"><b>Llenos:</b> ${r[3]}</div>
-                        <div class="col-6"><b>Vacíos:</b> ${r[4]}</div>
-                    </div>
-                    <div class="mt-2 small text-white-50"><i>${r[8] || 'Sin observaciones'}</i></div>
-                    <a href="${r[9]}" target="_blank" class="btn btn-sm btn-outline-info mt-2 w-100">Ver Evidencia</a>
-                </div>
-            `).join('');
-        }
-    } catch(e) { 
-        resDiv.innerHTML = '<p class="text-danger">Error de conexión con la base de datos.</p>'; 
-    }
+        resDiv.innerHTML = filtrado.reverse().map(r => `
+            <div class="history-item">
+                <small>${r[0].split('T')[0]} - ${r[7]}</small><br>
+                <b>Llenos: ${r[3]} | Vacíos: ${r[4]}</b><br>
+                <a href="${r[9]}" target="_blank" class="btn btn-sm btn-outline-info mt-2">Ver Foto</a>
+            </div>
+        `).join('');
+    } catch(e) { resDiv.innerHTML = "Error de conexión."; }
 }
