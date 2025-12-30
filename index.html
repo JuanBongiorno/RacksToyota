@@ -3,56 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suragua - Gestión de Racks</title>
+    <title>Suragua Pro - Gestión de Racks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Indicadores de Estado -->
-    <div id="offline-tag" class="status-bar bg-warning d-none">MODO OFFLINE: Los datos se guardarán en el teléfono</div>
-    <div id="sync-tag" class="status-bar bg-success d-none">Sincronizando datos pendientes con la nube...</div>
+    <!-- Barra de Estado de Sincronización -->
+    <div id="sync-banner" class="sync-banner d-none">
+        <span id="sync-msg">Subiendo 1 reporte pendiente...</span>
+    </div>
 
     <div class="water-bg"></div>
     <div class="dark-overlay"></div>
 
-    <div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100 py-4">
         
         <!-- LOGIN -->
         <div id="login-box" class="glass-card p-5 text-center shadow-lg">
-            <img src="./Suragua-Logotipo-removebg-preview.png" class="logo-main mb-4">
+            <img src="./Suragua-Logotipo.png" class="logo-main mb-4" style="width: 200px;">
             <h2 class="text-white fw-light mb-4">Bienvenido</h2>
-            <div class="mb-3">
-                <input type="text" id="user" class="form-control glass-input" placeholder="Usuario">
-            </div>
-            <div class="mb-4">
-                <input type="password" id="pass" class="form-control glass-input" placeholder="Contraseña">
-            </div>
+            <input type="text" id="user" class="form-control glass-input mb-3" placeholder="Usuario">
+            <input type="password" id="pass" class="form-control glass-input mb-4" placeholder="Contraseña">
             <button class="btn btn-suragua w-100" onclick="login()">INGRESAR</button>
         </div>
 
-        <!-- FORMULARIO REPARTIDOR -->
-        <div id="form-box" class="glass-card p-4 d-none w-100" style="max-width: 600px;">
-            <div class="text-center mb-4 border-bottom border-white-50 pb-3">
-                <img src="./Suragua-Logotipo-removebg-preview.png" style="width: 130px;">
-                <p class="text-info mb-0 mt-2 small fw-bold">REPOSICIÓN DE RACKS</p>
+        <!-- FORMULARIO -->
+        <div id="form-box" class="glass-card p-4 d-none w-100" style="max-width: 500px;">
+            <div class="text-center mb-3">
+                <img src="./Suragua-Logotipo.png" style="width: 100px;">
+                <p class="text-info small fw-bold mb-0">ENVÍO INSTANTÁNEO</p>
             </div>
             <form id="rackForm">
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label class="label-glass">FECHA Y HORA ACTUAL</label>
-                        <input type="text" id="displayFecha" class="form-control-static" readonly>
-                    </div>
-                    <div class="col-md-12">
-                        <label class="label-glass">NÚMERO DE RACK</label>
-                        <input type="number" id="nroRack" class="form-control glass-input" required placeholder="000">
+                <div class="row g-2">
+                    <div class="col-12"><input type="text" id="displayFecha" class="form-control-static text-center" readonly></div>
+                    <div class="col-12">
+                        <label class="label-glass">NRO RACK</label>
+                        <input type="number" id="nroRack" class="form-control glass-input" required>
                     </div>
                     <div class="col-6">
-                        <label class="label-glass">BIDONES LLENOS</label>
+                        <label class="label-glass">LLENOS</label>
                         <input type="number" id="llenos" class="form-control glass-input" required>
                     </div>
                     <div class="col-6">
-                        <label class="label-glass">BIDONES VACÍOS</label>
+                        <label class="label-glass">VACÍOS</label>
                         <input type="number" id="vacios" class="form-control glass-input" required>
                     </div>
                     <div class="col-6">
@@ -64,42 +58,34 @@
                         <input type="text" id="lugar" class="form-control glass-input" required>
                     </div>
                     <div class="col-12">
-                        <label class="label-glass text-info">OPERADOR RESPONSABLE</label>
-                        <input type="text" id="repartidor" class="form-control-static fw-bold" readonly>
+                        <label class="label-glass text-info">OPERADOR: <input type="text" id="repartidor" class="form-control-static d-inline w-auto" readonly></label>
                     </div>
                     <div class="col-12">
-                        <label class="label-glass">OBSERVACIONES</label>
-                        <textarea id="obs" class="form-control glass-input" rows="2"></textarea>
+                        <textarea id="obs" class="form-control glass-input" placeholder="Observaciones..." rows="1"></textarea>
                     </div>
-                    <div class="col-12 mt-4">
+                    <div class="col-12 mt-3">
                         <label class="btn-foto w-100">
-                            <span id="txt-foto">📸 TOMAR FOTO OBLIGATORIA</span>
+                            <span id="txt-foto">📸 SACAR FOTO</span>
                             <input type="file" id="foto" accept="image/*" capture="camera" hidden required>
                         </label>
-                        <p id="foto-check" class="text-center text-info small mt-2"></p>
+                        <p id="foto-check" class="text-center text-info small mt-1"></p>
                     </div>
                     <div class="col-12">
-                        <button type="submit" id="btnEnviar" class="btn btn-suragua w-100 py-3 mt-2">ENVIAR REPORTE</button>
+                        <button type="submit" id="btnEnviar" class="btn btn-suragua w-100 py-3">ENVIAR AHORA</button>
                     </div>
                 </div>
             </form>
         </div>
 
         <!-- PANEL OFICINA -->
-        <div id="office-box" class="glass-card p-5 d-none w-100" style="max-width: 800px;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-<<<<<<< HEAD
-                <img src="https://i.ibb.co/LhyM4pM/suragua-logo.png" style="width: 100px;">
-=======
->>>>>>> a037d19 (modo offline)
-                <h4 class="text-white mb-0">Panel Control</h4>
-            </div>
-            <div class="input-group mb-4">
+        <div id="office-box" class="glass-card p-4 d-none w-100" style="max-width: 700px;">
+            <h4 class="text-white mb-4">Panel Control</h4>
+            <div class="input-group mb-3">
                 <input type="number" id="searchRack" class="form-control glass-input" placeholder="Nro de rack...">
-                <button class="btn btn-info px-4 fw-bold" onclick="buscarRack()">BUSCAR</button>
+                <button class="btn btn-info" onclick="buscarRack()">BUSCAR</button>
             </div>
             <div id="historial-results" class="results-container"></div>
-            <button class="btn btn-link text-white-50 mt-4 d-block mx-auto" onclick="location.reload()">Salir</button>
+            <button class="btn btn-link text-white-50 w-100 mt-3" onclick="location.reload()">Salir</button>
         </div>
 
     </div>
